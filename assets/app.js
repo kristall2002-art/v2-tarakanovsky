@@ -271,9 +271,35 @@ function initModals(){
   });
 }
 
+/* ---------- сдержанное появление блоков при прокрутке ---------- */
+function initReveal(){
+  var items = $$('[data-reveal]');
+  if(!items.length) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || !('IntersectionObserver' in window)){
+    items.forEach(function(el){ el.classList.add('in-view'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {rootMargin:'0px 0px -8% 0px', threshold:0.12});
+  items.forEach(function(el){ io.observe(el); });
+}
+
+/* ---------- iOS Safari: включаем срабатывание :active по касанию ---------- */
+function initTouchActive(){
+  document.addEventListener('touchstart', function(){}, {passive:true});
+}
+
 function init(){
   initHeader(); initMenu(); initServices(); initFaq(); initHeroPanel();
   initA11y(); initForm(); initModals(); initInfo();
+  initTouchActive(); initReveal();
   var y = $('#year'); if(y) y.textContent = new Date().getFullYear();
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
